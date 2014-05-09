@@ -1,0 +1,119 @@
+/users/<id> GET
+{
+    "user_id": 10,
+    "username": "andresnds",
+    "email": "andresnds@hotmail.com",
+    "name": "Andre",
+    "surname": "Saraiva",
+    "age": 21,
+    "gender": "male",
+}
+
+/users/<id> PUT
+manda um json igual ao do GET com os parâmetros que você quer atualizar
+
+/patient POST
+{
+    "username": "andresnds",
+    "password": 1234,
+    "email": "andresnds@hotmail.com",
+    "name": "Andre",
+    "surname": "Saraiva",
+    "age": 21,
+    "gender": "male",
+}
+
+/patient/<id> GET
+{
+    "user_id": 10,
+    "username": "andresnds",
+    "email": "andresnds@hotmail.com",
+    "name": "Andre",
+    "surname": "Saraiva",
+    "age": 21,
+    "gender": "male",
+    "appointments": [
+        {
+            "appointment_id": 77,
+            "doctor": {
+                "name": "Espanta Murissoca",
+                "specialty": ["Mopologista", "Melcacologista"],
+            },
+            "schedule": {
+                "from": "2011-07-14T22:01:00.947Z", //isodate
+                "to": "2011-07-14T22:01:15.4354Z",
+            },
+            "clinic": {
+                "clinic_id": 23,
+                "name": "Clinica bizurada",
+                "address": {
+                    "street": "Rua H8-B",
+                    "number": "212",
+                    "complement": "Vaga B",
+                    "neighborhood": "CTA",
+                    "city": "Sao Jose dos Campos",
+                    "state": "Sao Paulo",
+                    "country": "Brasil"
+                }
+            }
+        }
+    ],
+}
+
+/patient/<id> PUT
+manda um json igual ao do GET com os parâmetros que você quer atualizar
+
+/doctor/<id> GET
+{
+    "user_id": 11,
+    "username": "espanta",
+    "email": "espanta@gmail.com",
+    "name": "Espanta",
+    "surname": "Murissoca",
+    "age": 21,
+    "specialty": ["Mopologista", "Melcacologista"],
+    "gender": "male",
+    "appointments": [
+        {
+            "appointment_id": 77,
+            "patient": {
+                "name": "Andre Saraiva",
+                "age": 21
+            },
+            "schedule": {
+                "from": "2011-07-14T22:01:00.947Z", //isodate
+                "to": "2011-07-14T22:01:15.4354Z",
+            },
+            "clinic": {
+                "clinic_id": 23,
+                "name": "Clinica bizurada",
+                "address": {
+                    "street": "Rua H8-B",
+                    "number": "212",
+                    "complement": "Vaga B",
+                    "neighborhood": "CTA",
+                    "city": "Sao Jose dos Campos",
+                    "state": "Sao Paulo",
+                    "country": "Brasil"
+                }
+            }
+
+        },
+    ]
+}
+
+
+/doctors GET
+[
+    {
+        "name": "Espanta",
+        "surname": "Murissoca",
+        "specialty": ["Mopologista", "Melcacologista"],
+        "gender": "male",
+    },{
+        "name": "Who",
+        "surname": "",
+        "specialty": ["Sexologista", "Pediatra"],
+        "gender": "male",
+    }
+]
