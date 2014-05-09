@@ -1,0 +1,5 @@
+{
+  "phabricator.uri" : "http://ec2-54-186-131-188.us-west-2.compute.amazonaws.com/",
+  "repository.callsign" : "S",
+  "project.name" : "DrFacil Server"
+}
