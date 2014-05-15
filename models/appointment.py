@@ -1,12 +1,26 @@
 import mongoengine
 from mongoengine import errors, fields
 from models.user import Doctor, Patient
+from models.clinic import Clinic
+
+
+class Schedule(mongoengine.EmbeddedDocument):
+	
+	begin = fields.DateTimeField(required=True)
+	end = fields.DateTimeField(required=True)
+
+	def to_dict(self):
+		return {
+			'begin': self.begin,
+			'end': self.end,
+		}
+
 
 class Appointment(mongoengine.Document):
 	
 	doctor = fields.ReferenceField(Doctor, required=True)
 	patient = fields.ReferenceField(Patient, required=True)
-	schedule = fields.ReferenceField(Schedule, required=True)
+	schedule = fields.EmbeddedDocumentField(Schedule, required=True)
 	clinic = fields.ReferenceField(Clinic, required=True)
 
 	def to_dict(self, doctor_info=False, patient_info=False):
@@ -35,15 +49,3 @@ class Appointment(mongoengine.Document):
 			return cls.objects.get(patient=patient)
 		except errors.DoesNotExist:
 			return None			
-
-
-class Schedule(mongoengine.EmbeddedDocument):
-	
-	begin = fields.DateTimeField(required=True)
-	end = fields.DateTimeField(required=True)
-
-	def to_dict(self):
-		return {
-			'begin': self.begin,
-			'end': self.end,
-		}

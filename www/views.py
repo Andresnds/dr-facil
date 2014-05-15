@@ -1,126 +1,64 @@
 from www import app
-from flask import make_response, jsonify, request
-#from models import user
-
-doctors = [
-    {
-    "user_id": 1,
-    "username": "espanta",
-    "email": "espanta@gmail.com",
-    "name": "Espanta",
-    "surname": "Murissoca",
-    "age": 21,
-    "speciality": ["Mopologista", "Melcacologista"],
-    "gender": "male",
-    "appointments": [{
-        "appointment_id": 77,
-        "patient": {
-            "name": "Andre Saraiva",
-            "age": 21
-        },
-        "schedule": {
-            "from": "2011-07-14T22:01:00.947Z",
-            "to": "2011-07-14T22:01:15.4354Z",
-        },
-        "clinic": {
-            "clinic_id": 23,
-            "name": "Clinica bizurada",
-            "address": {
-                "street": "Rua H8-B",
-                "number": "212",
-                "complement": "Vaga B",
-                "neighborhood": "CTA",
-                "city": "Sao Jose dos Campos",
-                "state": "Sao Paulo",
-                "country": "Brasil"
-                }
-            }
-
-        }]
-    }
-]
-
-patients = [{
-    "user_id": 2,
-    "username": "andresnds",
-    "email": "andresnds@hotmail.com",
-    "name": "Andre",
-    "surname": "Saraiva",
-    "age": 21,
-    "gender": "male",
-    "appointments": [
-        {
-            "appointment_id": 77,
-            "doctor": {
-                "name": "Espanta Murissoca",
-                "specialty": ["Mopologista", "Melcacologista"],
-            },
-            "schedule": {
-                "from": "2011-07-14T22:01:00.947Z",
-                "to": "2011-07-14T22:01:15.4354Z",
-            },
-            "clinic": {
-                "clinic_id": 23,
-                "name": "Clinica bizurada",
-                "address": {
-                    "street": "Rua H8-B",
-                    "number": "212",
-                    "complement": "Vaga B",
-                    "neighborhood": "CTA",
-                    "city": "Sao Jose dos Campos",
-                    "state": "Sao Paulo",
-                    "country": "Brasil"
-                }
-            }
-        }
-    ],
-}]
-
-#TODO trocar tudo por services que se comunicam com DB
-
+from flask import make_response, jsonify, request, abort
+from models.user import Doctor, Patient
 
 @app.route('/doctors', methods=['GET'])
 def get_doctors():
-    return jsonify( {'doctors': doctors} )
+    return jsonify(Doctor.get_all())
 
 
-@app.route('/doctor/<int:doctor_id>', methods=['GET'])
+@app.route('/doctor/<doctor_id>', methods=['GET'])
 def get_doctor(doctor_id):
-    doctor = filter(lambda p: p['user_id']==doctor_id, doctors)
-    if len(doctor)>0:
-        return jsonify(doctor[0])
-    abort(404)
+    doctor = Doctor.find_by_id(doctor_id)
+    return jsonify(doctor.to_dict())
 
 
 @app.route('/doctors', methods=['POST'])
 def insert_doctor():
     if not request.json:
         abort(400)
-    doctor = request.json()
-    doctor['user_id'] = doctors[-1]['user_id']+1
-    doctors.append(doctor)
-    return jsonify(doctor)
+    try:
+        doctor = _populate_doctor(request.json)
+        doctor.save()
+    except:
+        abort(500)        
+    return jsonify(doctor.to_dict())
 
 
-@app.route('/patient/<int:patient_id>', methods=['GET'])
+@app.route('/patient/<patient_id>', methods=['GET'])
 def get_patient(patient_id):
-    patient = filter(lambda p : p['user_id']==patient_id, patients)
-    if len(patient)>0:
-        return jsonify(patient[0])
-    abort(404)
+    patient = Patient.find_by_id(patient_id)
+    return jsonify(patient.to_dict())
 
 
-@app.route('/patients', methods=['PUT'])
+@app.route('/patients', methods=['POST'])
 def insert_patient():
     if not request.json:
         abort(400)
-    patient = request.json()
-    patient['user_id'] = patients[-1]['user_id']+1
-    patients.append(patient)
-    return patient
+    try:
+        patient = _populate_patient(request.json)
+        patient.save()
+    except:
+        abort(500)        
+    return jsonify(patient.to_dict())
 
+def _populate_doctor(params):
+    return Doctor(
+            username = params['username'],
+            email = params['email'],
+            first_name  = params['first_name'],
+            last_name = params['last_name'],
+            birthdate = params['birthdate'],
+            gender = params['gender'],
+            specialities = params['specialities'],
+        )
 
-@app.route('/')
-def test_route():
-    pass  
- 
+def _populate_patient(params):
+    return Patient(
+            username = params['username'],
+            email = params['email'],
+            first_name  = params['first_name'],
+            last_name = params['last_name'],
+            birthdate = params['birthdate'],
+            gender = params['gender'],
+        )
