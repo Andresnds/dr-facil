@@ -1,5 +1,6 @@
 from www import app
 from flask import make_response, jsonify, request
+#from models import user
 
 doctors = [
     {
@@ -9,7 +10,7 @@ doctors = [
     "name": "Espanta",
     "surname": "Murissoca",
     "age": 21,
-    "specialty": ["Mopologista", "Melcacologista"],
+    "speciality": ["Mopologista", "Melcacologista"],
     "gender": "male",
     "appointments": [{
         "appointment_id": 77,
@@ -91,14 +92,14 @@ def get_doctor(doctor_id):
     abort(404)
 
 
-@app.route('/doctors', methods=['PUT'])
+@app.route('/doctors', methods=['POST'])
 def insert_doctor():
     if not request.json:
         abort(400)
     doctor = request.json()
     doctor['user_id'] = doctors[-1]['user_id']+1
     doctors.append(doctor)
-    return doctor
+    return jsonify(doctor)
 
 
 @app.route('/patient/<int:patient_id>', methods=['GET'])
@@ -107,6 +108,7 @@ def get_patient(patient_id):
     if len(patient)>0:
         return jsonify(patient[0])
     abort(404)
+
 
 @app.route('/patients', methods=['PUT'])
 def insert_patient():
@@ -117,3 +119,8 @@ def insert_patient():
     patients.append(patient)
     return patient
 
+
+@app.route('/')
+def test_route():
+    pass  
+ 
