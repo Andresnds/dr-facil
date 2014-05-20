@@ -9,7 +9,7 @@ class User(mongoengine.Document):
     email = fields.StringField(required=True)
     first_name = fields.StringField(required=True, max_length=50)
     last_name = fields.StringField(required=True, max_length=50)
-    birthdate = fields.StringField(required=True) 
+    birthdate = fields.StringField(required=True)
     #look at the DateTimeField Documentation later
     gender = fields.StringField(required=True, max_length=6)
 
@@ -27,7 +27,7 @@ class User(mongoengine.Document):
     def get_role(self):
         raise NotImplementedError()
 
-    @classmethod        
+    @classmethod
     def find_by_id(cls, user_id):
         oid = bson.objectid.ObjectId(user_id)
         try:
@@ -35,7 +35,7 @@ class User(mongoengine.Document):
         except errors.DoesNotExist:
             return None
 
-    @classmethod        
+    @classmethod
     def find_by_username(cls, username):
         try:
             return cls.objects.get(username=username)
@@ -43,18 +43,20 @@ class User(mongoengine.Document):
             return None
 
 class Doctor(User):
-    
-    specialities = fields.ListField(fields.StringField(max_length=50), required=True)
+
+    specialities = fields.ListField(fields.ReferenceField(Clinic, required=True), required=True)
 
     def to_dict(self):
         result = super(Doctor, self).to_dict()
-        result['specialities'] = self.specialities
+        result['specialities'] = []
+        for speciality in self.specialities:
+            result['specialities'].append(speciality,to_dict())
         return result
 
     def get_role(self):
         return 'doctor'
 
-    @classmethod    
+    @classmethod
     def get_all(cls):
         result = []
         for doctor in cls.objects:
@@ -65,4 +67,3 @@ class Patient(User):
 
     def get_role():
         return 'patient'
-        

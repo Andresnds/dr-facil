@@ -2,8 +2,8 @@ import mongoengine
 from mongoengine import errors, fields
 
 class Address(mongoengine.EmbeddedDocument):
-	
-	street = fields.StringField(required=True, max_length=50)
+
+	street = fields.StringField(required=True)
 	number = fields.IntField()
 	complement = fields.StringField(max_length=50)
 	neighborhood = fields.StringField(required=True, max_length=50)
@@ -23,7 +23,7 @@ class Address(mongoengine.EmbeddedDocument):
 		}
 
 class Clinic(mongoengine.Document):
-	
+
 	name = fields.StringField(required=True, max_length=50)
 	address = fields.EmbeddedDocumentField(Address, required=True)
 
@@ -38,4 +38,4 @@ class Clinic(mongoengine.Document):
 		try:
 			return cls.objects.get(name=name)
 		except errors.DoesNotExist:
-			return None	
+			return None
