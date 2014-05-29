@@ -1,4 +1,5 @@
 import mongoengine, bson
+from specialty import Specialty
 from mongoengine import errors, fields
 
 class User(mongoengine.Document):
@@ -42,15 +43,22 @@ class User(mongoengine.Document):
         except errors.DoesNotExist:
             return None
 
+    @classmethod
+    def find_by_email(cls, email):
+        try:
+            return cls.objects.get(email=email)
+        except errors.DoesNotExist:
+            return None
+
 class Doctor(User):
 
-    specialities = fields.ListField(fields.ReferenceField(Clinic, required=True), required=True)
+    specialties = fields.ListField(fields.ReferenceField(Specialty, required=True), required=True)
 
     def to_dict(self):
         result = super(Doctor, self).to_dict()
-        result['specialities'] = []
-        for speciality in self.specialities:
-            result['specialities'].append(speciality,to_dict())
+        result['specialties'] = []
+        for specialty in self.specialties:
+            result['specialties'].append(specialty.to_dict())
         return result
 
     def get_role(self):
@@ -62,6 +70,7 @@ class Doctor(User):
         for doctor in cls.objects:
             result.append(doctor.to_dict())
         return {'doctors': result}
+
 
 class Patient(User):
 
