@@ -1,6 +1,6 @@
 import mongoengine
 from mongoengine import errors, fields
-from models.user import Doctor, Patient
+from models.user import Professional, Patient
 from models.clinic import Clinic
 
 
@@ -18,28 +18,28 @@ class Schedule(mongoengine.EmbeddedDocument):
 
 class Appointment(mongoengine.Document):
 	
-	doctor = fields.ReferenceField(Doctor, required=True)
+	professional = fields.ReferenceField(Professional, required=True)
 	patient = fields.ReferenceField(Patient, required=True)
 	schedule = fields.EmbeddedDocumentField(Schedule, required=True)
 	clinic = fields.ReferenceField(Clinic, required=True)
 
-	def to_dict(self, doctor_info=False, patient_info=False):
+	def to_dict(self, professional_info=False, patient_info=False):
 		result = {
 			'schedule': self.schedule.to_dict(),
 			'clinic': self.clinic.to_dict(),
 		}
 
-		if doctor_info:
-			result['doctor'] = self.doctor.to_dict()
+		if professional_info:
+			result['professional'] = self.professional.to_dict()
 		if patient_info:
 			result['patient'] = self.patient.to_dict()
 
 		return result
 
 	@classmethod
-	def find_by_doctor(cls, doctor):
+	def find_by_professional(cls, professional):
 		try:
-			return cls.objects.get(doctor=doctor)
+			return cls.objects.get(professional=professional)
 		except errors.DoesNotExist:
 			return None
 
