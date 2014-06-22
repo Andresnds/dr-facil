@@ -50,26 +50,26 @@ class User(mongoengine.Document):
         except errors.DoesNotExist:
             return None
 
-class Doctor(User):
+class Professional(User):
 
     specialties = fields.ListField(fields.ReferenceField(Specialty, required=True), required=True)
 
     def to_dict(self):
-        result = super(Doctor, self).to_dict()
+        result = super(Professional, self).to_dict()
         result['specialties'] = []
         for specialty in self.specialties:
             result['specialties'].append(specialty.to_dict())
         return result
 
     def get_role(self):
-        return 'doctor'
+        return 'professional'
 
     @classmethod
     def get_all(cls):
         result = []
-        for doctor in cls.objects:
-            result.append(doctor.to_dict())
-        return {'doctors': result}
+        for professional in cls.objects:
+            result.append(professional.to_dict())
+        return {'professionals': result}
 
 
 class Patient(User):

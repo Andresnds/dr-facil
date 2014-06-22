@@ -1,34 +1,34 @@
 from www import app
 from flask import make_response, jsonify, request, abort
-from models.user import Doctor, Patient
+from models.user import Professional, Patient
 from models.specialty import Specialty
 
-@app.route('/doctors', methods=['GET'])
-def get_doctors():
-    return jsonify(Doctor.get_all())
+@app.route('/professionals', methods=['GET'])
+def get_professionals():
+    return jsonify(Professional.get_all())
 
 
-@app.route('/doctor', methods=['GET'])
-def get_doctor():
+@app.route('/professional', methods=['GET'])
+def get_professional():
     if not request.json or request.json.get('id') is None:
         abort(400)
     try:
-        doctor = Doctor.find_by_id(request.json['id'])
+        professional = Professional.find_by_id(request.json['id'])
     except:
         abort(500)
-    return jsonify(doctor.to_dict())
+    return jsonify(professional.to_dict())
 
 
-@app.route('/doctors', methods=['POST'])
-def insert_doctor():
+@app.route('/professionals', methods=['POST'])
+def insert_professional():
     if not request.json:
         abort(400)
     try:
-        doctor = _populate_doctor(request.json)
-        doctor.save()
+        professional = _populate_professional(request.json)
+        professional.save()
     except:
         abort(500)
-    return jsonify(doctor.to_dict())
+    return jsonify(professional.to_dict())
 
 
 @app.route('/patient', methods=['GET'])
@@ -80,29 +80,29 @@ def insert_specialty():
         abort(500)
     return jsonify(specialty.to_dict())
 
-@app.route('/doctors/search')
-def search_doctors():
-    doctors = Doctor.get_all()['doctors']
+@app.route('/professionals/search')
+def search_professionals():
+    professionals = Professional.get_all()['professionals']
 
-    return jsonify(_filter_doctors(doctors, request.args))
+    return jsonify(_filter_professionals(professionals, request.args))
 
-def _filter_doctors(doctors, params):
+def _filter_professionals(professionals, params):
     result = []
-    for doctor in doctors:
+    for professional in professionals:
         belongs = False
-        for specialty in doctor['specialties']:
+        for specialty in professional['specialties']:
             if specialty['id'] in params.get('specialties').split(','):
                 belongs = True
         if belongs:
-            result.append(doctor)
+            result.append(professional)
 
-    # doctors = result
+    # professionals = result
     # result = []
-    # for doctor in doctors:
+    # for professional in professionals:
     return {'result': result}
 
-def _populate_doctor(params):
-    doctor = Doctor(
+def _populate_professional(params):
+    professional = Professional(
             username = params['username'],
             email = params['email'],
             first_name  = params['first_name'],
@@ -112,8 +112,8 @@ def _populate_doctor(params):
             specialties = [],
         )
     for specialty_id in params['specialties']:
-        doctor.specialties.append(Specialty.find_by_id(specialty_id))
-    return doctor
+        professional.specialties.append(Specialty.find_by_id(specialty_id))
+    return professional
 
 def _populate_patient(params):
     return Patient(
