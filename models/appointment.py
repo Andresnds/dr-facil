@@ -1,11 +1,10 @@
 import mongoengine
 from mongoengine import errors, fields
 from models.user import Professional, Patient
-from models.clinic import Clinic
 
 
 class Schedule(mongoengine.EmbeddedDocument):
-	
+
 	begin = fields.DateTimeField(required=True)
 	end = fields.DateTimeField(required=True)
 
@@ -17,16 +16,14 @@ class Schedule(mongoengine.EmbeddedDocument):
 
 
 class Appointment(mongoengine.Document):
-	
+
 	professional = fields.ReferenceField(Professional, required=True)
 	patient = fields.ReferenceField(Patient, required=True)
 	schedule = fields.EmbeddedDocumentField(Schedule, required=True)
-	clinic = fields.ReferenceField(Clinic, required=True)
 
 	def to_dict(self, professional_info=False, patient_info=False):
 		result = {
 			'schedule': self.schedule.to_dict(),
-			'clinic': self.clinic.to_dict(),
 		}
 
 		if professional_info:
@@ -48,4 +45,4 @@ class Appointment(mongoengine.Document):
 		try:
 			return cls.objects.get(patient=patient)
 		except errors.DoesNotExist:
-			return None			
+			return None
