@@ -111,7 +111,8 @@ def _populate_professional(params):
             gender = params['gender'],
             specialties = [],
         )
-    for specialty_id in params['specialties']:
+    for specialty in params['specialties']:
+        specialty_id = specialty['id']
         professional.specialties.append(Specialty.find_by_id(specialty_id))
     return professional
 
