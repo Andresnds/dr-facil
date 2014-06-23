@@ -2,6 +2,31 @@ import mongoengine, bson
 from specialty import Specialty
 from mongoengine import errors, fields
 
+
+class Address(mongoengine.EmbeddedDocument):
+
+    street = fields.StringField(required=True)
+    number = fields.IntField()
+    zip_code = fields.StringField(max_length=10, required=True)
+    complement = fields.StringField(max_length=50)
+    neighborhood = fields.StringField(required=True, max_length=50)
+    city = fields.StringField(required=True, max_length=50)
+    state = fields.StringField(required=True, max_length=50)
+    country = fields.StringField(required=True, max_length=50)
+
+    def to_dict(self):
+           return {
+                   'street': self.street,
+                   'number': str(self.number) if self.number is not None else 's/n',
+                   'complement': self.complement,
+                   'neighborhood': self.neighborhood,
+                   'city': self.city,
+                   'state': self.state,
+                   'country': self.country,
+                   'zip_code': self.zip_code,
+           }
+
+
 class User(mongoengine.Document):
 
     meta = {'allow_inheritance': True}
@@ -11,6 +36,7 @@ class User(mongoengine.Document):
     first_name = fields.StringField(required=True, max_length=50)
     last_name = fields.StringField(required=True, max_length=50)
     birthdate = fields.StringField(required=True)
+    image_url = fields.StringField()
     #look at the DateTimeField Documentation later
     gender = fields.StringField(required=True, max_length=6)
 
@@ -23,6 +49,7 @@ class User(mongoengine.Document):
             'last_name': self.last_name,
             'birthdate': self.birthdate,
             'gender': self.gender,
+            'image_url': self.image_url if self.image_url is not None else None,
         }
 
     def get_role(self):
@@ -53,12 +80,20 @@ class User(mongoengine.Document):
 class Professional(User):
 
     specialties = fields.ListField(fields.ReferenceField(Specialty, required=True), required=True)
+    insurances = fields.ListField(fields.ReferenceField(Insurance, required=True), required=True)
+    rating = fields.IntField(min_value=0, max_value=5)
+    address = fields.EmbeddedDocumentField(Address, required=True)
 
     def to_dict(self):
         result = super(Professional, self).to_dict()
+        result['address'] = self.address.to_dict()
+        result['rating'] = self.rating
         result['specialties'] = []
         for specialty in self.specialties:
             result['specialties'].append(specialty.to_dict())
+        result['insurances'] = []
+        for insurance in self.insurances:
+            result['insurances'].append(insurance.to_dict())
         return result
 
     def get_role(self):
@@ -70,6 +105,7 @@ class Professional(User):
         for professional in cls.objects:
             result.append(professional.to_dict())
         return {'professionals': result}
+
 
 
 class Patient(User):

@@ -1,7 +1,9 @@
 from www import app
 from flask import make_response, jsonify, request, abort
-from models.user import Professional, Patient
+from models.user import Professional, Patient, Address
 from models.specialty import Specialty
+from models.insurance import Insurance
+from models.appointment import Appointment, Schedule
 
 @app.route('/professionals', methods=['GET'])
 def get_professionals():
@@ -80,11 +82,48 @@ def insert_specialty():
         abort(500)
     return jsonify(specialty.to_dict())
 
-@app.route('/professionals/search')
-def search_professionals():
-    professionals = Professional.get_all()['professionals']
+@app.route('/insurances')
+def get_insurances():
+    try:
+        return jsonify(Insurance.get_all())
+    except:
+        abort(500)
 
-    return jsonify(_filter_professionals(professionals, request.args))
+@app.route('/insurances', methods=['POST'])
+def insert_insurance():
+    if not request.json:
+        abort(400)
+    try:
+        insurance = Insurance(name=request.json['name'])
+        insurance.save()
+    except:
+        abort(500)
+    return jsonify(insurance.to_dict())
+
+@app.route('/appointments', methods=['POST'])
+def create_appointment():
+    if not request.json:
+        abort(400)
+    try:
+        params = request.json
+        professional = Professional.find_by_id(params['professional_id'])
+        appointments = Appointment.find_by_professional(professional)
+        for appointment in appointments:
+            schedule = appointment.schedule.to_dict()
+            if not (params['begin'] < schedule['begin'] and params['end'] < schedule['begin'] or params['begin'] > schedule['end'] and params['end'] > schedule['end']):
+                abort(404)
+
+        appointment = Appointment()
+        appointment.save()
+    except:
+        abort(500)
+    return jsonify(appointment.to_dict())
+
+# @app.route('/professionals/search')
+# def search_professionals():
+#     professionals = Professional.get_all()['professionals']
+
+#     return jsonify(_filter_professionals(professionals, request.args))
 
 def _filter_professionals(professionals, params):
     result = []
@@ -102,6 +141,7 @@ def _filter_professionals(professionals, params):
     return {'result': result}
 
 def _populate_professional(params):
+    addrezz = params['address']
     professional = Professional(
             username = params['username'],
             email = params['email'],
@@ -110,10 +150,25 @@ def _populate_professional(params):
             birthdate = params['birthdate'],
             gender = params['gender'],
             specialties = [],
+            rating = params ['rating'],
+            address = Address(
+                    street = addrezz['street'],
+                    number = addrezz.get('number'),
+                    complement = addrezz.get('complement'),
+                    neighborhood = addrezz['neighborhood'],
+                    city = addrezz['city'],
+                    state = addrezz['state'],
+                    country = addrezz['country'],
+                    zip_code = addrezz['zip_code'],
+                ),
         )
+    professional.image_url = params.get('image_url')
     for specialty in params['specialties']:
         specialty_id = specialty['id']
         professional.specialties.append(Specialty.find_by_id(specialty_id))
+    for insurance in params['insurances']:
+        insurance_id = insurance['id']
+        professional.specialties.append(Insurance.find_by_id(insurance_id))
     return professional
 
 def _populate_patient(params):
