@@ -1,7 +1,7 @@
 import mongoengine, bson
 from mongoengine import errors, fields
 
-class Specialty(mongoengine.Document):
+class Insurance(mongoengine.Document):
 
 	name = fields.StringField(required=True, max_length=50)
 
@@ -14,13 +14,13 @@ class Specialty(mongoengine.Document):
 	@classmethod
 	def get_all(cls):
 		result = []
-		for specialty in cls.objects:
-			result.append(specialty.to_dict())
+		for insurance in cls.objects:
+			result.append(insurance.to_dict())
 		return result
 
 	@classmethod
-	def find_by_id(cls, specialty_id):
-		oid = bson.objectid.ObjectId(specialty_id)
+	def find_by_id(cls, insurance_id):
+		oid = bson.objectid.ObjectId(insurance_id)
 		try:
 			return cls.objects.get(id=oid)
 		except errors.DoesNotExist:

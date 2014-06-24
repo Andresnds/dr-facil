@@ -1,5 +1,6 @@
 import mongoengine, bson
 from specialty import Specialty
+from insurance import Insurance
 from mongoengine import errors, fields
 
 
@@ -104,7 +105,7 @@ class Professional(User):
         result = []
         for professional in cls.objects:
             result.append(professional.to_dict())
-        return {'professionals': result}
+        return result
 
 
 

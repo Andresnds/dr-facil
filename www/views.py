@@ -1,13 +1,14 @@
 from www import app
 from flask import make_response, jsonify, request, abort
 from models.user import Professional, Patient, Address
+import json
 from models.specialty import Specialty
 from models.insurance import Insurance
 from models.appointment import Appointment, Schedule
 
 @app.route('/professionals', methods=['GET'])
 def get_professionals():
-    return jsonify(Professional.get_all())
+    return json.dumps(Professional.get_all())
 
 
 @app.route('/professional', methods=['GET'])
@@ -67,7 +68,7 @@ def insert_patient():
 @app.route('/specialties')
 def get_specialties():
     try:
-        return jsonify(Specialty.get_all())
+        return json.dumps(Specialty.get_all())
     except:
         abort(500)
 
@@ -85,7 +86,7 @@ def insert_specialty():
 @app.route('/insurances')
 def get_insurances():
     try:
-        return jsonify(Insurance.get_all())
+        return json.dumps(Insurance.get_all())
     except:
         abort(500)
 
@@ -119,13 +120,15 @@ def create_appointment():
         abort(500)
     return jsonify(appointment.to_dict())
 
-# @app.route('/professionals/search')
-# def search_professionals():
-#     professionals = Professional.get_all()['professionals']
-
-#     return jsonify(_filter_professionals(professionals, request.args))
+@app.route('/professionals/search')
+def search_professionals():
+    professionals = Professional.get_all()
+    return json.dumps(_filter_professionals(professionals, request.args))
 
 def _filter_professionals(professionals, params):
+    if params.get('specialties') is None:
+        return professionals
+
     result = []
     for professional in professionals:
         belongs = False
@@ -138,7 +141,7 @@ def _filter_professionals(professionals, params):
     # professionals = result
     # result = []
     # for professional in professionals:
-    return {'result': result}
+    return result
 
 def _populate_professional(params):
     addrezz = params['address']
