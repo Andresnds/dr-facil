@@ -106,7 +106,6 @@ def get_appointment_patient_id(patient_id):
     try:
         patient = Patient.find_by_id(patient_id)
         appointments = [appointment.to_dict() for appointment in Appointment.find_by_patient(patient)]
-1
     except:
         abort(500)
     return json.dumps(appointments)
