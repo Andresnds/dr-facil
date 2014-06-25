@@ -255,7 +255,6 @@ def _found_slots(start_date, end_date, professional_id):
     professional = Professional.find_by_id(professional_id)
     appointments = Appointment.find_by_professional(professional)
     while start_date + half_hour <= end_date:
-        print '\nooooooooooooooooooooooooooooooooooooooooooo\n'
         occupied = False
         for appointment in appointments:
             schedule_start_date = dateparser.parse(appointment.start_date)
