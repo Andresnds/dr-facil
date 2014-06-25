@@ -197,7 +197,6 @@ def _filter_professionals(professionals, params):
         if belongs:
             result.append(professional)
 
-    1
     return result
 
 def _populate_professional(params):
@@ -239,13 +238,11 @@ def _populate_patient(params):
             gender = params['gender'],
         )
 
-    if params.keys().count('birthdate') is not 0:
-        patient.birthdate = params.get('birthdate')
+    patient.birthdate = params.get('birthdate')
 
-    if params.keys().count('birthdate') is not 0:
-        patient.username = params['username']
-    else:
-        email = params['email'].find("@")
+    patient.username = params.get('username')
+    if patient.username is None:
+        email = params.get('email')
         patient.username = email[0:email.find("@")]
 
     return patient
