@@ -56,9 +56,9 @@ def insert_patient():
     if not request.json:
         abort(400)
     try:
-        patient = _populate_patient(request.json)
-        same_patient = filter(lambda p: p["email"] is patient.email, Patient.get_all())
-        if len(same_patient) is not 0:
+        patient = Patient.find_by_email(request.json['email'])
+        if patient is None:
+            patient = _populate_patient(request.json)
             patient.save()
 
     except:
@@ -123,7 +123,7 @@ def get_appointment_professional_id(professional_id):
 def create_appointment():
     if not request.form:
         abort(400)
-    # try:
+    try:
         params = request.form
         professional = Professional.find_by_id(params['professional_id'])
         appointments = Appointment.find_by_professional(professional)
@@ -135,8 +135,6 @@ def create_appointment():
             if not (start_date <= schedule_start_date and end_date <= schedule_start_date or start_date >= schedule_end_date and end_date >= schedule_end_date):
                 abort(404)
 
-        print params
-
         appointment = Appointment(
                 professional = professional,
                 patient = Patient.find_by_id(params['patient_id']),
@@ -144,12 +142,9 @@ def create_appointment():
                 end_date = params['end_date'],
             )
 
-        print appointments
-
         appointment.save()
-    # except Exception as e:
-        # print e
-        # abort(500)
+    except:
+        abort(500)
     return jsonify(appointment.to_dict())
 
 @app.route('/professional/slots/<professional_id>')
@@ -160,6 +155,8 @@ def get_slots(professional_id):
         start_date = dateparser.parse(request.args['start_date'])
         end_date = dateparser.parse(request.args['end_date'])
         slots = _found_slots(start_date, end_date, professional_id)
+        for slot in slots:
+            print slot["start_date"]
     except:
         abort(500)
     return json.dumps(slots)
@@ -196,20 +193,14 @@ def _filter_professionals(professionals, params):
             if belongs:
                 result.append(professional)
 
-    print result
-
     if params.get('start_date') is not None and params.get('end_date') is not None:
         professionals = result
         result = []
         for professional in professionals:
             start_date = dateparser.parse(params['start_date'])
             end_date = dateparser.parse(params['end_date'])
-            print start_date
-            print end_date
             if len(_found_slots(start_date, end_date, professional['id']))!= 0:
                 result.append(professional)
-
-    print result
 
     return result
 
