@@ -103,11 +103,11 @@ def insert_insurance():
 
 @app.route('/patient/appointments/<patient_id>')
 def get_appointment_patient_id(patient_id):
-    try:
-        patient = Patient.find_by_id(patient_id)
-        appointments = [appointment.to_dict() for appointment in Appointment.find_by_patient(patient)]
-    except:
-        abort(500)
+    # try:
+    patient = Patient.find_by_id(patient_id)
+    appointments = [appointment.to_dict() for appointment in Appointment.find_by_patient(patient)]
+    # except:
+        # abort(500)
     return json.dumps(appointments)
 
 @app.route('/professional/appointments/<professional_id>')
