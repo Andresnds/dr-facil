@@ -13,7 +13,7 @@ class Appointment(mongoengine.Document):
 	def to_dict(self, professional_info=False, patient_info=False):
 		return {
 			'id': str(self.id),
-			'professional_id': str(self.professional.id),
+			'professional': professional.to_dict(),
 			'patient_id': str(self.patient.id),
 			'start_date': self.start_date,
 			'end_date': self.end_date,
