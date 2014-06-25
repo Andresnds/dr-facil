@@ -1,4 +1,4 @@
-import json
+import json, datetime, hashlib
 import dateutil.parser as dateparser
 from www import app
 from flask import make_response, jsonify, request, abort
@@ -106,15 +106,6 @@ def insert_insurance():
     return jsonify(insurance.to_dict())
 
 
-@app.route('/patients', methods=['POST'])
-def insert_patient():
-    if not request.json:
-        abort(400)
-    try:
-        patient = _populate_patient(request.json)
-        same_patient = filter(lambda p: p["email"] is patient.email, Patient.get_all())
-        if len(same_patient) is not 0:
-
 @app.route('/appointments/by_patient'):
 def get_appointment_patient_id():
     if not request.json or request.json.get('patient_id') is None:
@@ -168,6 +159,19 @@ def create_appointment():
         abort(500)
     return jsonify(appointment.to_dict())
 
+@app.route('professional/<professional_id>/slots')
+def get_slots(professional_id):
+    if not request.json:
+        abort(400)
+    try:
+        professional = Professional.find_by_id(professional_id)
+        appointments = Appointment.find_by_professional(professional)
+        start_date = dateparser(request.args['start_date'])
+        end_date = dateparser(request.args['end_date'])
+        slots = _found_slots(start_date, end_date, professional_id)
+    except:
+        abort(500)
+    return json.dumps(slots)
 
 @app.route('/professionals/search')
 def search_professionals():
@@ -175,29 +179,39 @@ def search_professionals():
     return json.dumps(_filter_professionals(professionals, request.args))
 
 def _filter_professionals(professionals, params):
-    if params.get('specialties') is None:
-        return professionals
+    result = professionals
 
-    result = []
-    for professional in professionals:
-        belongs = False
-        for specialty in professional['specialties']:
-            if specialty['id'] in params.get('specialties').split(','):
-                belongs = True
-        if belongs:
-            result.append(professional)
+    if params.get('specialty_ids') is not None:
+        professionals = result
+        result = []
+        for professional in professionals:
+            belongs = False
+            for specialty in professional['specialties']:
+                if specialty['id'] in params.get('specialty_ids').split(','):
+                    belongs = True
+            if belongs:
+                result.append(professional)
 
-    professionals = result
-    result = []
-    for professional in professionals:
-        belongs = False
-        for insurance in professional['insurances']:
-            if insurance['id'] in params.get('insurances').split(','):
-                belongs = True
-        if belongs:
-            result.append(professional)
 
-    1
+    if params.get('insurance_ids') is not None:
+        professionals = result
+        result = []
+        for professional in professionals:
+            belongs = False
+            for insurance in professional['insurances']:
+                if insurance['id'] in params.get('insurance_ids').split(','):
+                    belongs = True
+            if belongs:
+                result.append(professional)
+
+    if params.get('start_date') is not None and params.get('end_date') is not None:
+        professionals = result
+        result = []
+        for professional in professionals:
+            start_date = dateparser(params['start_date'])
+            end_date = dateparser(params['end_date'])
+            if len(_found_slots(start_date, end_date, professional['id']))!= 0:
+                result.append(professional)
     return result
 
 def _populate_professional(params):
@@ -249,3 +263,22 @@ def _populate_patient(params):
         patient.username = email[0:email.find("@")]
 
     return patient
+
+def _found_slots(start_date, end_date, professional_id):
+    start_date = start_date + datetime.timedelta(minutes=(30-start_date.minute%30)%30)
+    slots = []
+    half_hour = datetime.timedelta(minutes=30)
+    while start_date + half_hour <= end_date:
+        occupied = False
+        for appointment in appointments:
+            schedule_begin = dateparser(appointment.schedule.begin)
+            schedule_end = dateparser(appointment.schedule.end)
+            if not (start_date < schedule_begin and start_date + half_hour < schedule_begin or start_date > schedule_end and start_date + half_hour > schedule_end):
+                occupied = True
+                break
+            slots.append({
+                    'id': hashlib.md5(str(start_date)+professional_id).hexdigest(),
+                    'start_date': start_date.isoformat(),
+                })
+            start_date += half_hour
+    return slots
