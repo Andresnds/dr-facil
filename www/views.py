@@ -101,18 +101,18 @@ def insert_insurance():
         abort(500)
     return jsonify(insurance.to_dict())
 
-@app.route('/patient/<patient_id>/appointments')
+@app.route('/patient/appointments/<patient_id>')
 def get_appointment_patient_id(patient_id):
     try:
         patient = Patient.find_by_id(patient_id)
         appointments = [appointment.to_dict() for appointment in Appointment.find_by_patient(patient)]
-
+1
     except:
         abort(500)
     return json.dumps(appointments)
 
-@app.route('/professional/<professional_id>/appointments')
-def get_appointment_professional_id():
+@app.route('/professional/appointments/<professional_id>')
+def get_appointment_professional_id(professional_id):
     try:
         professional = professional.find_by_id(professional_id)
         appointments = [appointment.to_dict() for appointment in Appointment.find_by_professional(professional)]
@@ -128,14 +128,13 @@ def create_appointment():
         params = request.json
         professional = Professional.find_by_id(params['professional_id'])
         appointments = Appointment.find_by_professional(professional)
-        start_date = dateparser(params['start_date'])
-        end_date = dateparser(params['end_date'])
+        start_date = dateparser.parse(params['start_date'])
+        end_date = dateparser.parse(params['end_date'])
         for appointment in appointments:
-            schedule_start_date = dateparser(appointment.schedule.start_date)
-            schedule_end_date = dateparser(appointment.schedule.end_date)
-            if not (start_date < schedule_start_date and end_date < schedule_start_date or start_date > schedule_end_date and end_date > schedule_end_date):
+            schedule_start_date = dateparser.parse(appointment.start_date)
+            schedule_end_date = dateparser.parse(appointment.end_date)
+            if not (start_date <= schedule_start_date and end_date <= schedule_start_date or start_date >= schedule_end_date and end_date >= schedule_end_date):
                 abort(404)
-
         appointment = Appointment(
                 professional = professional,
                 patient = Patient.find_by_id(params['patient_id']),
@@ -147,7 +146,7 @@ def create_appointment():
         abort(500)
     return jsonify(appointment.to_dict())
 
-@app.route('/professional/<professional_id>/slots')
+@app.route('/professional/slots/<professional_id>')
 def get_slots(professional_id):
     if not request.json:
         abort(400)
@@ -261,7 +260,7 @@ def _found_slots(start_date, end_date, professional_id):
         for appointment in appointments:
             schedule_start_date = dateparser(appointment.schedule.start_date)
             schedule_end_date = dateparser(appointment.schedule.end_date)
-            if not (start_date < schedule_start_date and start_date + half_hour < schedule_start_date or start_date > schedule_end_date and start_date + half_hour > schedule_end_date):
+            if not (start_date <= schedule_start_date and start_date + half_hour <= schedule_start_date or start_date >= schedule_end_date and start_date + half_hour >= schedule_end_date):
                 occupied = True
                 break
             slots.append({
