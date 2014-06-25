@@ -142,9 +142,17 @@ def _filter_professionals(professionals, params):
         if belongs:
             result.append(professional)
 
-    # professionals = result
-    # result = []
-    # for professional in professionals:
+    professionals = result
+    result = []
+    for professional in professionals:
+        belongs = False
+        for insurance in professional['insurances']:
+            if insurance['id'] in params.get('insurances').split(','):
+                belongs = True
+        if belongs:
+            result.append(professional)
+
+    1
     return result
 
 def _populate_professional(params):
@@ -187,7 +195,7 @@ def _populate_patient(params):
         )
 
     if params.keys().count('birthdate') is not 0:
-        patient.birthdate = params['birthdate']
+        patient.birthdate = params.get('birthdate')
 
     if params.keys().count('birthdate') is not 0:
         patient.username = params['username']
