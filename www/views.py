@@ -113,7 +113,7 @@ def get_appointment_patient_id(patient_id):
 @app.route('/professional/appointments/<professional_id>')
 def get_appointment_professional_id(professional_id):
     try:
-        professional = professional.find_by_id(professional_id)
+        professional = Professional.find_by_id(professional_id)
         appointments = [appointment.to_dict() for appointment in Appointment.find_by_professional(professional)]
     except:
         abort(500)
