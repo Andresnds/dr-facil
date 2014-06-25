@@ -121,10 +121,10 @@ def get_appointment_professional_id(professional_id):
 
 @app.route('/appointments', methods=['POST'])
 def create_appointment():
-    if not request.json:
+    if not request.form:
         abort(400)
-    try:
-        params = request.json
+    # try:
+        params = request.form
         professional = Professional.find_by_id(params['professional_id'])
         appointments = Appointment.find_by_professional(professional)
         start_date = dateparser.parse(params['start_date'])
@@ -134,15 +134,22 @@ def create_appointment():
             schedule_end_date = dateparser.parse(appointment.end_date)
             if not (start_date <= schedule_start_date and end_date <= schedule_start_date or start_date >= schedule_end_date and end_date >= schedule_end_date):
                 abort(404)
+
+        print params
+
         appointment = Appointment(
                 professional = professional,
                 patient = Patient.find_by_id(params['patient_id']),
                 start_date = params['start_date'],
                 end_date = params['end_date'],
             )
+
+        print appointments
+
         appointment.save()
-    except:
-        abort(500)
+    # except Exception as e:
+        # print e
+        # abort(500)
     return jsonify(appointment.to_dict())
 
 @app.route('/professional/slots/<professional_id>')
@@ -189,14 +196,20 @@ def _filter_professionals(professionals, params):
             if belongs:
                 result.append(professional)
 
+    print result
+
     if params.get('start_date') is not None and params.get('end_date') is not None:
         professionals = result
         result = []
         for professional in professionals:
             start_date = dateparser.parse(params['start_date'])
             end_date = dateparser.parse(params['end_date'])
+            print start_date
+            print end_date
             if len(_found_slots(start_date, end_date, professional['id']))!= 0:
                 result.append(professional)
+
+    print result
 
     return result
 
