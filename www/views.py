@@ -5,7 +5,7 @@ from flask import make_response, jsonify, request, abort
 from models.user import Professional, Patient, Address
 from models.specialty import Specialty
 from models.insurance import Insurance
-from models.appointment import Appointment, Schedule
+from models.appointment import Appointment
 
 @app.route('/professionals', methods=['GET'])
 def get_professionals():
@@ -140,14 +140,11 @@ def create_appointment():
             if not (start_date < schedule_start_date and end_date < schedule_start_date or start_date > schedule_end_date and end_date > schedule_end_date):
                 abort(404)
 
-        schedule = Schedule(
-                start_date = params['start_date'],
-                end_date = params['end_date'],
-            )
         appointment = Appointment(
                 professional = professional,
                 patient = Patient.find_by_id(params['patient_id']),
-                schedule = schedule,
+                start_date = params['start_date'],
+                end_date = params['end_date'],
             )
         appointment.save()
     except:
