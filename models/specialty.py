@@ -16,7 +16,7 @@ class Specialty(mongoengine.Document):
 		result = []
 		for specialty in cls.objects:
 			result.append(specialty.to_dict())
-		return {'specialties': result}
+		return result
 
 	@classmethod
 	def find_by_id(cls, specialty_id):

@@ -1,3 +1,4 @@
+import json
 from www import app
 from flask import make_response, jsonify, request, abort
 from models.user import Professional, Patient, Address
@@ -7,7 +8,7 @@ from models.appointment import Appointment, Schedule
 
 @app.route('/professionals', methods=['GET'])
 def get_professionals():
-    return jsonify(Professional.get_all())
+    return json.dumps(Professional.get_all())
 
 
 @app.route('/professional', methods=['GET'])
@@ -59,7 +60,10 @@ def insert_patient():
         abort(400)
     try:
         patient = _populate_patient(request.json)
-        patient.save()
+        same_patient = filter(lambda p: p["email"] is patient.email, Patient.get_all())
+        if len(same_patient) is not 0:
+            patient.save()
+
     except:
         abort(500)
     return jsonify(patient.to_dict())
@@ -67,7 +71,7 @@ def insert_patient():
 @app.route('/specialties')
 def get_specialties():
     try:
-        return jsonify(Specialty.get_all())
+        return json.dumps(Specialty.get_all())
     except:
         abort(500)
 
@@ -85,7 +89,7 @@ def insert_specialty():
 @app.route('/insurances')
 def get_insurances():
     try:
-        return jsonify(Insurance.get_all())
+        return json.dumps(Insurance.get_all())
     except:
         abort(500)
 
@@ -119,13 +123,16 @@ def create_appointment():
         abort(500)
     return jsonify(appointment.to_dict())
 
-# @app.route('/professionals/search')
-# def search_professionals():
-#     professionals = Professional.get_all()['professionals']
 
-#     return jsonify(_filter_professionals(professionals, request.args))
+@app.route('/professionals/search')
+def search_professionals():
+    professionals = Professional.get_all()
+    return json.dumps(_filter_professionals(professionals, request.args))
 
 def _filter_professionals(professionals, params):
+    if params.get('specialties') is None:
+        return professionals
+
     result = []
     for professional in professionals:
         belongs = False
@@ -138,7 +145,7 @@ def _filter_professionals(professionals, params):
     # professionals = result
     # result = []
     # for professional in professionals:
-    return {'result': result}
+    return result
 
 def _populate_professional(params):
     addrezz = params['address']
@@ -172,11 +179,20 @@ def _populate_professional(params):
     return professional
 
 def _populate_patient(params):
-    return Patient(
-            username = params['username'],
+    patient = Patient(
             email = params['email'],
             first_name  = params['first_name'],
             last_name = params['last_name'],
-            birthdate = params['birthdate'],
             gender = params['gender'],
         )
+
+    if params.keys().count('birthdate') is not 0:
+        patient.birthdate = params['birthdate']
+
+    if params.keys().count('birthdate') is not 0:
+        patient.username = params['username']
+    else:
+        email = params['email'].find("@")
+        patient.username = email[0:email.find("@")]
+
+    return patient

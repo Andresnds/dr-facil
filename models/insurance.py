@@ -16,7 +16,7 @@ class Insurance(mongoengine.Document):
 		result = []
 		for insurance in cls.objects:
 			result.append(insurance.to_dict())
-		return {'insurances': result}
+		return result
 
 	@classmethod
 	def find_by_id(cls, insurance_id):
