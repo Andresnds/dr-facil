@@ -1,0 +1,1 @@
+ curl -X POST -H "Content-Type: application/json" -d '{"name": "Ginecologista"}' http://localhost:5000/specialties
