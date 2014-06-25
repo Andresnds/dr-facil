@@ -5,8 +5,8 @@ from models.user import Professional, Patient
 
 class Schedule(mongoengine.EmbeddedDocument):
 
-	begin = fields.DateTimeField(required=True)
-	end = fields.DateTimeField(required=True)
+	begin = fields.StringField(required=True)
+	end = fields.StringField(required=True)
 
 	def to_dict(self):
 		return {

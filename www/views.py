@@ -1,4 +1,5 @@
 import json
+import dateutil.parser as dateparser
 from www import app
 from flask import make_response, jsonify, request, abort
 from models.user import Professional, Patient, Address
@@ -112,12 +113,23 @@ def create_appointment():
         params = request.json
         professional = Professional.find_by_id(params['professional_id'])
         appointments = Appointment.find_by_professional(professional)
+        begin = dateparser(params['begin'])
+        end = dateparser(params['end'])
         for appointment in appointments:
-            schedule = appointment.schedule.to_dict()
-            if not (params['begin'] < schedule['begin'] and params['end'] < schedule['begin'] or params['begin'] > schedule['end'] and params['end'] > schedule['end']):
+            schedule_begin = dateparser(appointment.schedule.begin)
+            schedule_end = dateparser(appointment.schedule.end)
+            if not (begin < schedule_begin and end < schedule_begin or begin > schedule_end and end > schedule_end):
                 abort(404)
 
-        appointment = Appointment()
+        schedule = Schedule(
+                begin = params['begin'],
+                end = params['end'],
+            )
+        appointment = Appointment(
+                professional = professional,
+                patient = Patient.find_by_id(params['patient_id']),
+                schedule = schedule,
+            )
         appointment.save()
     except:
         abort(500)
