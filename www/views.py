@@ -105,17 +105,7 @@ def insert_insurance():
         abort(500)
     return jsonify(insurance.to_dict())
 
-
-@app.route('/patients', methods=['POST'])
-def insert_patient():
-    if not request.json:
-        abort(400)
-    try:
-        patient = _populate_patient(request.json)
-        same_patient = filter(lambda p: p["email"] is patient.email, Patient.get_all())
-        if len(same_patient) is not 0:
-
-@app.route('/appointments/by_patient'):
+@app.route('/appointments/by_patient')
 def get_appointment_patient_id():
     if not request.json or request.json.get('patient_id') is None:
         abort(400)
@@ -127,7 +117,7 @@ def get_appointment_patient_id():
         abort(500)
     return json.dumps(appointments)
 
-@app.route('/appointments/by_professional'):
+@app.route('/appointments/by_professional')
 def get_appointment_professional_id():
     if not request.json or request.json.get('professional_id') is None:
         abort(400)
