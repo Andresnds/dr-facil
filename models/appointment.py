@@ -2,34 +2,22 @@ import mongoengine
 from mongoengine import errors, fields
 from models.user import Professional, Patient
 
-
-class Schedule(mongoengine.EmbeddedDocument):
-
-	begin = fields.StringField(required=True)
-	end = fields.StringField(required=True)
-
-	def to_dict(self):
-		return {
-			'begin': self.begin,
-			'end': self.end,
-		}
-
-
 class Appointment(mongoengine.Document):
 
 	professional = fields.ReferenceField(Professional, required=True)
 	patient = fields.ReferenceField(Patient, required=True)
-	schedule = fields.EmbeddedDocumentField(Schedule, required=True)
+	start_date = fields.StringField(required=True)
+	end_date = fields.StringField(required=True)
 
 	def to_dict(self, professional_info=False, patient_info=False):
-		result = {
-			'schedule': self.schedule.to_dict(),
-		}
 
 		if professional_info:
 			result['professional'] = self.professional.to_dict()
 		if patient_info:
 			result['patient'] = self.patient.to_dict()
+
+		result['start_date'] = self.start_date
+		result['end_date'] = self.end_date
 
 		return result
 

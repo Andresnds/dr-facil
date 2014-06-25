@@ -132,17 +132,17 @@ def create_appointment():
         params = request.json
         professional = Professional.find_by_id(params['professional_id'])
         appointments = Appointment.find_by_professional(professional)
-        begin = dateparser.parse(params['start_date'])
-        end = dateparser.parse(params['end_date'])
+        start_date = dateparser(params['start_date'])
+        end_date = dateparser(params['end_date'])
         for appointment in appointments:
-            schedule_begin = dateparser.parse(appointment.schedule.begin)
-            schedule_end = dateparser.parse(appointment.schedule.end)
-            if not (begin < schedule_begin and end < schedule_begin or begin > schedule_end and end > schedule_end):
+            schedule_start_date = dateparser(appointment.schedule.start_date)
+            schedule_end_date = dateparser(appointment.schedule.end_date)
+            if not (start_date < schedule_start_date and end_date < schedule_start_date or start_date > schedule_end_date and end_date > schedule_end_date):
                 abort(404)
 
         schedule = Schedule(
-                begin = params['start_date'],
-                end = params['end_date'],
+                start_date = params['start_date'],
+                end_date = params['end_date'],
             )
         appointment = Appointment(
                 professional = professional,
@@ -175,6 +175,7 @@ def search_professionals():
 
 def _filter_professionals(professionals, params):
     result = professionals
+
     if params.get('specialty_ids') is not None:
         professionals = result
         result = []
@@ -183,9 +184,9 @@ def _filter_professionals(professionals, params):
             for specialty in professional['specialties']:
                 if specialty['id'] in params.get('specialty_ids').split(','):
                     belongs = True
+                    break
             if belongs:
                 result.append(professional)
-
 
     if params.get('insurance_ids') is not None:
         professionals = result
@@ -195,6 +196,7 @@ def _filter_professionals(professionals, params):
             for insurance in professional['insurances']:
                 if insurance['id'] in params.get('insurance_ids').split(','):
                     belongs = True
+                    break
             if belongs:
                 result.append(professional)
 
@@ -264,9 +266,9 @@ def _found_slots(start_date, end_date, professional_id):
     while start_date + half_hour <= end_date:
         occupied = False
         for appointment in appointments:
-            schedule_begin = dateparser.parse(appointment.schedule.begin)
-            schedule_end = dateparser.parse(appointment.schedule.end)
-            if not (start_date < schedule_begin and start_date + half_hour < schedule_begin or start_date > schedule_end and start_date + half_hour > schedule_end):
+            schedule_start_date = dateparser(appointment.schedule.start_date)
+            schedule_end_date = dateparser(appointment.schedule.end_date)
+            if not (start_date < schedule_start_date and start_date + half_hour < schedule_start_date or start_date > schedule_end_date and start_date + half_hour > schedule_end_date):
                 occupied = True
                 break
             slots.append({
