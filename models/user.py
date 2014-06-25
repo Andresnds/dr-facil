@@ -36,7 +36,7 @@ class User(mongoengine.Document):
     email = fields.StringField(required=True)
     first_name = fields.StringField(required=True, max_length=50)
     last_name = fields.StringField(required=True, max_length=50)
-    birthdate = fields.StringField(required=True)
+    birthdate = fields.StringField()
     image_url = fields.StringField()
     #look at the DateTimeField Documentation later
     gender = fields.StringField(required=True, max_length=6)
@@ -113,3 +113,13 @@ class Patient(User):
 
     def get_role():
         return 'patient'
+
+    @classmethod
+    def get_all(cls):
+        result = []
+        for patient in cls.objects:
+            result.append(patient.to_dict())
+        return result
+
+    def to_dict(self):
+        return super(Patient, self).to_dict()

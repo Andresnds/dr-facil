@@ -60,7 +60,10 @@ def insert_patient():
         abort(400)
     try:
         patient = _populate_patient(request.json)
-        patient.save()
+        same_patient = filter(lambda p: p["email"] is patient.email, Patient.get_all())
+        if len(same_patient) is not 0:
+            patient.save()
+
     except:
         abort(500)
     return jsonify(patient.to_dict())
@@ -175,11 +178,20 @@ def _populate_professional(params):
     return professional
 
 def _populate_patient(params):
-    return Patient(
-            username = params['username'],
+    patient = Patient(
             email = params['email'],
             first_name  = params['first_name'],
             last_name = params['last_name'],
-            birthdate = params['birthdate'],
             gender = params['gender'],
         )
+
+    if params.keys().count('birthdate') is not 0:
+        patient.birthdate = params['birthdate']
+
+    if params.keys().count('birthdate') is not 0:
+        patient.username = params['username']
+    else:
+        email = params['email'].find("@")
+        patient.username = email[0:email.find("@")]
+
+    return patient
