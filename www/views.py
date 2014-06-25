@@ -12,12 +12,10 @@ def get_professionals():
     return json.dumps(Professional.get_all())
 
 
-@app.route('/professional', methods=['GET'])
-def get_professional():
-    if not request.json or request.json.get('id') is None:
-        abort(400)
+@app.route('/professional/<professional_id>', methods=['GET'])
+def get_professional(professional_id):
     try:
-        professional = Professional.find_by_id(request.json['id'])
+        professional = Professional.find_by_id(professional_id)
     except:
         abort(500)
     return jsonify(professional.to_dict())
@@ -35,12 +33,10 @@ def insert_professional():
     return jsonify(professional.to_dict())
 
 
-@app.route('/patient', methods=['GET'])
-def get_patient():
-    if not request.json or request.json.get('id') is None:
-        abort(400)
+@app.route('/patient/<patient_id>', methods=['GET'])
+def get_patient(patient_id):
     try:
-        patient = Patient.find_by_id(request.json['id'])
+        patient = Patient.find_by_id(patient_id)
     except:
         abort(500)
     return jsonify(patient.to_dict())
