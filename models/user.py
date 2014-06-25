@@ -35,6 +35,7 @@ class User(mongoengine.Document):
     id = fields.SequenceField(primary_key=True, sequence_name='user')
     username = fields.StringField(required=True, max_length=20)
     email = fields.StringField(required=True)
+    fone = fields.StringField()
     first_name = fields.StringField(required=True, max_length=50)
     last_name = fields.StringField(required=True, max_length=50)
     birthdate = fields.StringField()
@@ -47,6 +48,7 @@ class User(mongoengine.Document):
             'id': str(self.id),
             'username': self.username,
             'email': self.email,
+            'fone': self.fone,
             'first_name': self.first_name,
             'last_name': self.last_name,
             'birthdate': self.birthdate,
