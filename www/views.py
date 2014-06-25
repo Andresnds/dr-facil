@@ -105,8 +105,7 @@ def insert_insurance():
         abort(500)
     return jsonify(insurance.to_dict())
 
-
-@app.route('/appointments/by_patient'):
+@app.route('/appointments/by_patient')
 def get_appointment_patient_id():
     if not request.json or request.json.get('patient_id') is None:
         abort(400)
@@ -118,7 +117,7 @@ def get_appointment_patient_id():
         abort(500)
     return json.dumps(appointments)
 
-@app.route('/appointments/by_professional'):
+@app.route('/appointments/by_professional')
 def get_appointment_professional_id():
     if not request.json or request.json.get('professional_id') is None:
         abort(400)
@@ -179,8 +178,6 @@ def search_professionals():
     return json.dumps(_filter_professionals(professionals, request.args))
 
 def _filter_professionals(professionals, params):
-    result = professionals
-
     if params.get('specialty_ids') is not None:
         professionals = result
         result = []
@@ -212,6 +209,7 @@ def _filter_professionals(professionals, params):
             end_date = dateparser(params['end_date'])
             if len(_found_slots(start_date, end_date, professional['id']))!= 0:
                 result.append(professional)
+
     return result
 
 def _populate_professional(params):
@@ -253,13 +251,11 @@ def _populate_patient(params):
             gender = params['gender'],
         )
 
-    if params.keys().count('birthdate') is not 0:
-        patient.birthdate = params.get('birthdate')
+    patient.birthdate = params.get('birthdate')
 
-    if params.keys().count('birthdate') is not 0:
-        patient.username = params['username']
-    else:
-        email = params['email'].find("@")
+    patient.username = params.get('username')
+    if patient.username is None:
+        email = params.get('email')
         patient.username = email[0:email.find("@")]
 
     return patient
