@@ -3,6 +3,7 @@ from mongoengine import errors, fields
 
 class Specialty(mongoengine.Document):
 
+	id = fields.SequenceField(primary_key=True, sequence_name='specialty')
 	name = fields.StringField(required=True, max_length=50)
 
 	def to_dict(self):

@@ -136,8 +136,8 @@ def create_appointment():
         params = request.json
         professional = Professional.find_by_id(params['professional_id'])
         appointments = Appointment.find_by_professional(professional)
-        begin = dateparser(params['begin'])
-        end = dateparser(params['end'])
+        begin = dateparser(params['start_date'])
+        end = dateparser(params['end_date'])
         for appointment in appointments:
             schedule_begin = dateparser(appointment.schedule.begin)
             schedule_end = dateparser(appointment.schedule.end)
@@ -145,8 +145,8 @@ def create_appointment():
                 abort(404)
 
         schedule = Schedule(
-                begin = params['begin'],
-                end = params['end'],
+                begin = params['start_date'],
+                end = params['end_date'],
             )
         appointment = Appointment(
                 professional = professional,
@@ -158,7 +158,7 @@ def create_appointment():
         abort(500)
     return jsonify(appointment.to_dict())
 
-@app.route('professional/<professional_id>/slots')
+@app.route('/professional/<professional_id>/slots')
 def get_slots(professional_id):
     if not request.json:
         abort(400)
@@ -178,6 +178,7 @@ def search_professionals():
     return json.dumps(_filter_professionals(professionals, request.args))
 
 def _filter_professionals(professionals, params):
+    result = professionals
     if params.get('specialty_ids') is not None:
         professionals = result
         result = []

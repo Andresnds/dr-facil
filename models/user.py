@@ -32,6 +32,7 @@ class User(mongoengine.Document):
 
     meta = {'allow_inheritance': True}
 
+    id = fields.SequenceField(primary_key=True, sequence_name='user')
     username = fields.StringField(required=True, max_length=20)
     email = fields.StringField(required=True)
     first_name = fields.StringField(required=True, max_length=50)
