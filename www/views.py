@@ -105,24 +105,20 @@ def insert_insurance():
         abort(500)
     return jsonify(insurance.to_dict())
 
-@app.route('/appointments/by_patient')
-def get_appointment_patient_id():
-    if not request.json or request.json.get('patient_id') is None:
-        abort(400)
+@app.route('/patient/<patient_id>/appointments')
+def get_appointment_patient_id(patient_id):
     try:
-        patient = Patient.find_by_id(request.json['patient_id'])
+        patient = Patient.find_by_id(patient_id)
         appointments = [appointment.to_dict() for appointment in Appointment.find_by_patient(patient)]
 
     except:
         abort(500)
     return json.dumps(appointments)
 
-@app.route('/appointments/by_professional')
+@app.route('/professional/<professional_id>/appointments')
 def get_appointment_professional_id():
-    if not request.json or request.json.get('professional_id') is None:
-        abort(400)
     try:
-        professional = professional.find_by_id(request.json['professional_id'])
+        professional = professional.find_by_id(professional_id)
         appointments = [appointment.to_dict() for appointment in Appointment.find_by_professional(professional)]
     except:
         abort(500)
@@ -136,11 +132,11 @@ def create_appointment():
         params = request.json
         professional = Professional.find_by_id(params['professional_id'])
         appointments = Appointment.find_by_professional(professional)
-        begin = dateparser(params['start_date'])
-        end = dateparser(params['end_date'])
+        begin = dateparser.parse(params['start_date'])
+        end = dateparser.parse(params['end_date'])
         for appointment in appointments:
-            schedule_begin = dateparser(appointment.schedule.begin)
-            schedule_end = dateparser(appointment.schedule.end)
+            schedule_begin = dateparser.parse(appointment.schedule.begin)
+            schedule_end = dateparser.parse(appointment.schedule.end)
             if not (begin < schedule_begin and end < schedule_begin or begin > schedule_end and end > schedule_end):
                 abort(404)
 
@@ -165,8 +161,8 @@ def get_slots(professional_id):
     try:
         professional = Professional.find_by_id(professional_id)
         appointments = Appointment.find_by_professional(professional)
-        start_date = dateparser(request.args['start_date'])
-        end_date = dateparser(request.args['end_date'])
+        start_date = dateparser.parse(request.args['start_date'])
+        end_date = dateparser.parse(request.args['end_date'])
         slots = _found_slots(start_date, end_date, professional_id)
     except:
         abort(500)
@@ -206,8 +202,8 @@ def _filter_professionals(professionals, params):
         professionals = result
         result = []
         for professional in professionals:
-            start_date = dateparser(params['start_date'])
-            end_date = dateparser(params['end_date'])
+            start_date = dateparser.parse(params['start_date'])
+            end_date = dateparser.parse(params['end_date'])
             if len(_found_slots(start_date, end_date, professional['id']))!= 0:
                 result.append(professional)
 
@@ -268,8 +264,8 @@ def _found_slots(start_date, end_date, professional_id):
     while start_date + half_hour <= end_date:
         occupied = False
         for appointment in appointments:
-            schedule_begin = dateparser(appointment.schedule.begin)
-            schedule_end = dateparser(appointment.schedule.end)
+            schedule_begin = dateparser.parse(appointment.schedule.begin)
+            schedule_end = dateparser.parse(appointment.schedule.end)
             if not (start_date < schedule_begin and start_date + half_hour < schedule_begin or start_date > schedule_end and start_date + half_hour > schedule_end):
                 occupied = True
                 break
