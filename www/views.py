@@ -147,8 +147,6 @@ def create_appointment():
 
 @app.route('/professional/slots/<professional_id>')
 def get_slots(professional_id):
-    if not request.json:
-        abort(400)
     try:
         professional = Professional.find_by_id(professional_id)
         appointments = Appointment.find_by_professional(professional)
@@ -254,17 +252,21 @@ def _found_slots(start_date, end_date, professional_id):
     start_date = start_date + datetime.timedelta(minutes=(30-start_date.minute%30)%30)
     slots = []
     half_hour = datetime.timedelta(minutes=30)
+    professional = Professional.find_by_id(professional_id)
+    appointments = Appointment.find_by_professional(professional)
     while start_date + half_hour <= end_date:
+        print '\nooooooooooooooooooooooooooooooooooooooooooo\n'
         occupied = False
         for appointment in appointments:
-            schedule_start_date = dateparser(appointment.schedule.start_date)
-            schedule_end_date = dateparser(appointment.schedule.end_date)
+            schedule_start_date = dateparser.parse(appointment.start_date)
+            schedule_end_date = dateparser.parse(appointment.end_date)
             if not (start_date <= schedule_start_date and start_date + half_hour <= schedule_start_date or start_date >= schedule_end_date and start_date + half_hour >= schedule_end_date):
                 occupied = True
                 break
+        if not occupied:
             slots.append({
                     'id': hashlib.md5(str(start_date)+professional_id).hexdigest(),
                     'start_date': start_date.isoformat(),
                 })
-            start_date += half_hour
+        start_date += half_hour
     return slots
